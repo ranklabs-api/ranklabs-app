@@ -1,0 +1,20 @@
+# Default metadata template
+defaults:
+  title: "{{page_title}} | {{site_name}}"
+  description: "{{meta_description}}"
+  robots: "index, follow"
+  viewport: "width=device-width, initial-scale=1.0"
+  charset: "UTF-8"
+  
+og_defaults:
+  type: "website"
+  locale: "en_US"
+  site_name: "{{site_name}}"
+  
+schema_defaults:
+  organization:
+    "@type": "Organization"
+  website:
+    "@type": "WebSite"
+  local_business:
+    "@type": "LocalBusiness"

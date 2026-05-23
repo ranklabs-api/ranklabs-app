@@ -1,0 +1,25 @@
+# Autonomous SEO optimization rules
+auto_apply:
+  # These are safe to apply automatically
+  meta_descriptions: true
+  title_tags: true
+  schema_markup: true
+  alt_text: true
+  open_graph_tags: true
+  internal_links: true
+  sitemap: true
+  
+require_approval:
+  # These require human approval
+  content_rewrites: true
+  url_changes: true
+  page_deletion: true
+  canonical_changes: true
+  structure_changes: true
+
+schedule:
+  technical_scan: "daily"
+  metadata_validation: "daily"
+  performance_analysis: "weekly"
+  competitor_check: "weekly"
+  full_report: "weekly"

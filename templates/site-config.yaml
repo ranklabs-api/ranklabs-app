@@ -1,0 +1,32 @@
+# SearchOps Site Configuration
+site:
+  name: ""
+  description: ""
+  domain: ""
+  
+branding:
+  logo: "/assets/images/logo.png"
+  primary_color: "#2563eb"
+  secondary_color: "#1e40af"
+  font_family: "Inter, sans-serif"
+
+seo:
+  title_template: "{page_title} | {site_name}"
+  meta_description: ""
+  keywords: []
+  og_image: "/assets/images/og-default.png"
+  twitter_handle: ""
+  
+content:
+  default_language: "en"
+  blog_enabled: true
+  
+contact:
+  email: ""
+  phone: ""
+  address: ""
+
+deployment:
+  branch: "main"
+  build_command: "npm run build"
+  output_dir: "dist"
