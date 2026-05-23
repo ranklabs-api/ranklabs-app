@@ -3,7 +3,7 @@
 const { chromium } = require('playwright');
 
 async function crawl(url) {
-  console.log(`Crawling: ${url}`);
+  console.error(`Crawling: ${url}`);
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   
