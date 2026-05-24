@@ -1,4 +1,4 @@
-# SearchOps
+# SearchRank
 
 AI-powered search operations platform.
 

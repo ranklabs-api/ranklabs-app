@@ -7,12 +7,12 @@ const fs = require('fs');
 const path = require('path');
 
 // ─── Config ──────────────────────────────────────────────────────────
-const ORG = process.env.GITHUB_ORG || 'searchops-api';
-const TEMPLATE_REPO = process.env.TEMPLATE_REPO || 'searchops';
+const ORG = process.env.GITHUB_ORG || 'searchrank-api';
+const TEMPLATE_REPO = process.env.TEMPLATE_REPO || 'searchrank';
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH || path.join(__dirname, '..', 'templates');
 
 function loadEnv() {
-  const envPath = path.join(__dirname, '..', '..', '..', 'searchops', '.env');
+  const envPath = path.join(__dirname, '..', '..', '..', 'searchrank', '.env');
   if (fs.existsSync(envPath)) {
     for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
       const [k, ...v] = line.split('=');
@@ -105,7 +105,7 @@ async function provision(customer) {
   
   // Step 2: Apply template
   console.log('\n🎨 Applying Astro SEO template...');
-  const workDir = `/tmp/searchops-provision-${repoName}`;
+  const workDir = `/tmp/searchrank-provision-${repoName}`;
   fs.mkdirSync(workDir, { recursive: true });
   
   const repoUrl = `https://oauth2:${process.env.GH_TOKEN}@github.com/${ORG}/${repoName}.git`;
@@ -136,7 +136,7 @@ async function provision(customer) {
   }
   
   // Commit and push
-  sh(`cd ${workDir} && git add -A && git commit -m "Provision: ${business_name} site from SearchOps template" && git push origin main`);
+  sh(`cd ${workDir} && git add -A && git commit -m "Provision: ${business_name} site from SearchRank template" && git push origin main`);
   console.log('  ✅ Template applied and pushed');
   
   // Step 3: Enable GitHub Pages

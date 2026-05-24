@@ -6,9 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const APPROVAL_DIR = path.join(process.env.HOME, '.hermes/workspace/searchops/approvals');
-const POSTS_DIR = path.join(process.env.HOME, '.hermes/workspace/searchops/posts');
-const PUBLISHED_DIR = path.join(process.env.HOME, '.hermes/workspace/searchops/published');
+const APPROVAL_DIR = path.join(process.env.HOME, '.hermes/workspace/searchrank/approvals');
+const POSTS_DIR = path.join(process.env.HOME, '.hermes/workspace/searchrank/posts');
+const PUBLISHED_DIR = path.join(process.env.HOME, '.hermes/workspace/searchrank/published');
 
 function publish(postId) {
   const approvalFile = path.join(APPROVAL_DIR, `${postId}.approved`);

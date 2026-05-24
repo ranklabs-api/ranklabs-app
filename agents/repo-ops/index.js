@@ -7,11 +7,11 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const ORG = process.env.GITHUB_ORG || 'searchops-api';
-const WORK_ROOT = process.env.REPO_OPS_WORKDIR || '/tmp/searchops-repo-ops';
+const ORG = process.env.GITHUB_ORG || 'searchrank-api';
+const WORK_ROOT = process.env.REPO_OPS_WORKDIR || '/tmp/searchrank-repo-ops';
 
 function loadEnv() {
-  const envPath = path.join(__dirname, '..', '..', '..', 'searchops', '.env');
+  const envPath = path.join(__dirname, '..', '..', '..', 'searchrank', '.env');
   if (fs.existsSync(envPath)) {
     for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
       const [k, ...v] = line.split('=');

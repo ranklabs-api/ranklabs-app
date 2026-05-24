@@ -10,9 +10,9 @@ const path = require('path');
 const url = require('url');
 
 const PORT = process.env.PORT || 3000;
-const POSTS_DIR = process.env.POSTS_DIR || path.join(process.env.HOME || '/tmp', '.hermes/workspace/searchops/posts');
-const APPROVAL_DIR = process.env.APPROVAL_DIR || path.join(process.env.HOME || '/tmp', '.hermes/workspace/searchops/approvals');
-const SECRET = process.env.APPROVAL_SECRET || 'searchops-approval-secret-change-me';
+const POSTS_DIR = process.env.POSTS_DIR || path.join(process.env.HOME || '/tmp', '.hermes/workspace/searchrank/posts');
+const APPROVAL_DIR = process.env.APPROVAL_DIR || path.join(process.env.HOME || '/tmp', '.hermes/workspace/searchrank/approvals');
+const SECRET = process.env.APPROVAL_SECRET || 'searchrank-approval-secret-change-me';
 
 fs.mkdirSync(APPROVAL_DIR, { recursive: true });
 
@@ -45,7 +45,7 @@ function html(page) {
   <div class="icon">${page.icon}</div>
   <h1>${page.heading}</h1>
   ${page.body}
-  <div class="meta">SearchOps AI &bull; ${new Date().toISOString().split('T')[0]}</div>
+  <div class="meta">SearchRank AI &bull; ${new Date().toISOString().split('T')[0]}</div>
 </div>
 </body>
 </html>`;
@@ -134,7 +134,7 @@ const server = http.createServer((req, res) => {
 
   // 404
   res.writeHead(404, { 'Content-Type': 'text/html' });
-  res.end(html({ icon: '🔍', heading: 'Page Not Found', body: '<p>This is a SearchOps AI approval endpoint. Use the link from your approval email.</p>' }));
+  res.end(html({ icon: '🔍', heading: 'Page Not Found', body: '<p>This is a SearchRank AI approval endpoint. Use the link from your approval email.</p>' }));
 });
 
 server.listen(PORT, () => {

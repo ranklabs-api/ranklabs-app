@@ -8,11 +8,11 @@ const path = require('path');
 const crypto = require('crypto');
 
 const TOKEN = process.env.GH_TOKEN;
-const ORG = process.env.GITHUB_ORG || 'searchops-api';
-const WORK_DIR = process.env.DEPLOY_WORKDIR || '/tmp/searchops-deploy';
+const ORG = process.env.GITHUB_ORG || 'searchrank-api';
+const WORK_DIR = process.env.DEPLOY_WORKDIR || '/tmp/searchrank-deploy';
 
 if (!TOKEN) {
-  const envPath = path.join(__dirname, '..', '..', '..', 'searchops', '.env');
+  const envPath = path.join(__dirname, '..', '..', '..', 'searchrank', '.env');
   if (fs.existsSync(envPath)) {
     const lines = fs.readFileSync(envPath, 'utf8').split('\n');
     for (const line of lines) {

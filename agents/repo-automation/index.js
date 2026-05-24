@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// repo-automation — GitHub repository operations for SearchOps
+// repo-automation — GitHub repository operations for SearchRank
 // Handles: create repo from template, configure Pages, manage settings
 
 const { execSync } = require('child_process');
@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Load env
-const envPath = path.join(__dirname, '..', '..', '..', 'searchops', '.env');
+const envPath = path.join(__dirname, '..', '..', '..', 'searchrank', '.env');
 if (fs.existsSync(envPath)) {
   const lines = fs.readFileSync(envPath, 'utf8').split('\n');
   for (const line of lines) {
@@ -17,7 +17,7 @@ if (fs.existsSync(envPath)) {
 }
 
 const TOKEN = process.env.GH_TOKEN;
-const ORG = process.env.GITHUB_ORG || 'searchops-api';
+const ORG = process.env.GITHUB_ORG || 'searchrank-api';
 
 if (!TOKEN) {
   console.error('GH_TOKEN not set');

@@ -61,13 +61,13 @@ Then write the post body.`;
 
 // Output the prompt + save it for the approval pipeline
 const postId = np.id || `POST-${new Date().toISOString().split('T')[0]}-001`;
-const APPROVAL_SECRET = process.env.APPROVAL_SECRET || 'searchops-approval-secret-change-me';
+const APPROVAL_SECRET = process.env.APPROVAL_SECRET || 'searchrank-approval-secret-change-me';
 const token = crypto.createHmac('sha256', APPROVAL_SECRET).update(postId).digest('hex').substring(0, 16);
 const approvalBaseUrl = process.env.APPROVAL_BASE_URL || 'http://localhost:3000';
 const approvalLink = `${approvalBaseUrl}/approve?code=${postId}&token=${token}`;
 
 // Save blog analysis with post ID + token for later publishing
-const postsDir = path.join(process.env.HOME, '.hermes/workspace/searchops/posts');
+const postsDir = path.join(process.env.HOME, '.hermes/workspace/searchrank/posts');
 fs.mkdirSync(postsDir, { recursive: true });
 fs.writeFileSync(
   path.join(postsDir, `${postId}.json`),

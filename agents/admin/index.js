@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// admin-dashboard — SearchOps platform admin CLI
+// admin-dashboard — SearchRank platform admin CLI
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 function loadEnv() {
-  const envPath = path.join(__dirname, '..', '..', '..', 'searchops', '.env');
+  const envPath = path.join(__dirname, '..', '..', '..', 'searchrank', '.env');
   if (fs.existsSync(envPath)) {
     for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
       const [k, ...v] = line.split('=');
@@ -15,14 +15,14 @@ function loadEnv() {
 }
 loadEnv();
 
-const ORG = process.env.GITHUB_ORG || 'searchops-api';
+const ORG = process.env.GITHUB_ORG || 'searchrank-api';
 
 function sh(cmd, opts = {}) { try { return execSync(cmd, { encoding: 'utf8', stdio: 'pipe', ...opts }); } catch (_) { return ''; } }
 
 function listCustomers() {
   const AUTH = `-H "Authorization: Bearer ${process.env.GH_TOKEN}"`;
   const repos = JSON.parse(sh(`curl -s "https://api.github.com/orgs/${ORG}/repos?per_page=50" ${AUTH}`) || '[]');
-  return repos.filter(r => r.name !== 'searchops' && !r.name.includes('template')).map(r => ({
+  return repos.filter(r => r.name !== 'searchrank' && !r.name.includes('template')).map(r => ({
     name: r.name, site: `https://${ORG}.github.io/${r.name}`, created: r.created_at, last_push: r.pushed_at,
   }));
 }
@@ -50,5 +50,5 @@ switch (command) {
     break;
   }
   default:
-    console.log('SearchOps Admin\nUsage:\n  node admin.js customers\n  node admin.js status <repo>\n  node admin.js health');
+    console.log('SearchRank Admin\nUsage:\n  node admin.js customers\n  node admin.js status <repo>\n  node admin.js health');
 }
