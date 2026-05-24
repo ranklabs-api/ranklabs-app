@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const blogFile = process.argv[2];
 const promptFile = process.argv[3] || path.join(__dirname, '../blog/prompt.txt');
@@ -60,15 +61,19 @@ Then write the post body.`;
 
 // Output the prompt + save it for the approval pipeline
 const postId = np.id || `POST-${new Date().toISOString().split('T')[0]}-001`;
+const APPROVAL_SECRET = process.env.APPROVAL_SECRET || 'searchops-approval-secret-change-me';
+const token = crypto.createHmac('sha256', APPROVAL_SECRET).update(postId).digest('hex').substring(0, 16);
+const approvalBaseUrl = process.env.APPROVAL_BASE_URL || 'http://localhost:3000';
+const approvalLink = `${approvalBaseUrl}/approve?code=${postId}&token=${token}`;
 
-// Save blog analysis with post ID for later publishing
+// Save blog analysis with post ID + token for later publishing
 const postsDir = path.join(process.env.HOME, '.hermes/workspace/searchops/posts');
 fs.mkdirSync(postsDir, { recursive: true });
 fs.writeFileSync(
   path.join(postsDir, `${postId}.json`),
-  JSON.stringify({ ...blogData, post_id: postId, prompt_generated_at: new Date().toISOString() }, null, 2)
+  JSON.stringify({ ...blogData, post_id: postId, approval_token: token, approval_link: approvalLink, prompt_generated_at: new Date().toISOString() }, null, 2)
 );
 
 console.log(fullPrompt);
-console.error(`Post ID: ${postId}`);
+console.error(`POST_META: ${JSON.stringify({ postId, token, approvalLink })}`);
 console.error(`Draft saved to: ${postsDir}/${postId}.json`);
