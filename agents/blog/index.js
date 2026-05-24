@@ -165,6 +165,7 @@ async function analyze(siteUrl) {
     const nicheName = siteTitle.split('–')[0]?.trim() || siteTitle.split('|')[0]?.trim() || 'Practice';
 
     result.new_post = {
+      id: `POST-${new Date().toISOString().split('T')[0]}-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`,
       status: 'draft',
       suggested_title: generateTitle(chosenTopic.topic, nicheName, result.site_niche),
       target_keyword: `${chosenTopic.topic} ${nicheName.toLowerCase()}`,
