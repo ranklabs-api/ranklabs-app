@@ -196,11 +196,11 @@ Templates:
 Options:
   --customer-id=<id>  Look up customer (required)
   --email=<addr>      Override recipient email
-  --data='{...}'      Template data as JSON (for blog-approval)
+  --payload='{...}'    Template data as JSON (for blog-approval)
 
 Examples:
   node notify-agent.js site-live --customer-id=bg_113610_002aea
-  node notify-agent.js blog-approval --customer-id=bg_113610_002aea --data='{"post_title":"...","post_id":"POST-...","target_keyword":"..."}'`);
+  node notify-agent.js blog-approval --customer-id=bg_113610_002aea --payload='{"post_title":"...","post_id":"POST-...","target_keyword":"..."}'`);
   process.exit(1);
 }
 
@@ -223,8 +223,8 @@ async function main() {
       emailTo = customer.contact_email;
     } else if (arg.startsWith('--email=')) {
       emailTo = arg.split('=')[1];
-    } else if (arg.startsWith('--data=')) {
-      try { templateData = JSON.parse(arg.slice(6)); } catch(e) { console.error('Invalid --data JSON'); process.exit(1); }
+    } else if (arg.startsWith('--payload=')) {
+      try { templateData = JSON.parse(arg.slice(10)); } catch(e) { console.error('Invalid --payload JSON'); process.exit(1); }
     }
   }
 
@@ -233,12 +233,26 @@ async function main() {
 
   const { subject, html } = TEMPLATES[template](customer, templateData);
 
+  // Build plain text version
+  let plainText = '';
+  if (template === 'site-live') {
+    plainText = `Your site is live, ${customer.contact_name}!\n\nHi ${customer.contact_name},\nYour site is now live and fully managed on Rank Labs:\n${customer.site_url}\n\nWhat's active:\n- HTTPS with automatic certificate renewal\n- SEO-optimized pages\n- Weekly automated SEO audits (first one within 24 hours)\n- AI blog content pipeline (2 posts/week)\n- Keyword & competitor tracking\n\nQuestions? Just reply to this email.\n\nRank Labs - ${BRAND.site}`;
+  } else if (template === 'welcome') {
+    plainText = `Welcome to Rank Labs, ${customer.contact_name}!\n\nHi ${customer.contact_name},\n${customer.business_name} is now in the lab. Your site (${customer.site_url}) is being provisioned.\n\nWhat happens next:\n1. Site built and deployed to Cloudflare\n2. First SEO audit within 24 hours (100+ checks)\n3. AI content pipeline starts drafting blog posts weekly\n\nQuestions? Reply anytime.\n\nRank Labs - ${BRAND.site}`;
+  } else if (template === 'blog-approval') {
+    plainText = `Blog Approval - ${templateData?.post_title || 'New Post'} [${templateData?.post_id || 'DRAFT'}]\n\nHi ${customer.contact_name},\n"${templateData?.post_title || 'A new blog post'}" is ready for review.\nTarget keyword: ${templateData?.target_keyword || 'N/A'}\nWord count: ~${templateData?.word_count || '800'}\n\nReply with APPROVE to publish, or describe changes you'd like.\n\nRank Labs - ${BRAND.site}`;
+  }
+
   const emailTemplate = `From: ${BRAND.fromName} <${BRAND.from}>
 To: ${emailTo}
 Subject: ${subject}
-Content-Type: text/html
 
-${html}`;
+<#multipart type=alternative>
+<#part type=text/plain>
+${plainText}
+<#part type=text/html>
+${html}
+<#/multipart>`;
 
   // Write to stdout for piping to himalaya
   console.log(emailTemplate);
