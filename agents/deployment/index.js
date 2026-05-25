@@ -23,25 +23,25 @@ function sh(cmd, opts = {}) {
 }
 
 async function deploy(repo, branch = 'main') {
-  console.log(`Deploying ${ORG}/${repo}...`);
+  console.error(`Deploying ${ORG}/${repo}...`);
   const results = { repo, branch, steps: [] };
   
   // Step 1: Validate build
-  console.log('1. Validating build...');
+  console.error('1. Validating build...');
   const AUTH = `-H "Authorization: Bearer ${process.env.GH_TOKEN}" -H "Accept: application/vnd.github+json"`;
   const workflows = sh(`curl -s "https://api.github.com/repos/${ORG}/${repo}/actions/workflows" ${AUTH}`, { ignoreError: true });
   const hasDeployWorkflow = workflows.includes('deploy.yml');
   results.steps.push({ step: 'validate_build_workflow', success: hasDeployWorkflow });
   
   // Step 2: Trigger deploy
-  console.log('2. Triggering deployment...');
+  console.error('2. Triggering deployment...');
   if (hasDeployWorkflow) {
     const trigger = sh(`curl -s -X POST "https://api.github.com/repos/${ORG}/${repo}/actions/workflows/deploy.yml/dispatches" ${AUTH} -d '{"ref":"${branch}"}' -w "%{http_code}"`, { ignoreError: true });
     results.steps.push({ step: 'trigger_deploy', status: trigger });
   }
   
   // Step 3: Check Pages status
-  console.log('3. Checking deployment...');
+  console.error('3. Checking deployment...');
   const pages = sh(`curl -s "https://api.github.com/repos/${ORG}/${repo}/pages" ${AUTH}`, { ignoreError: true });
   try {
     const pagesData = JSON.parse(pages);
@@ -51,7 +51,7 @@ async function deploy(repo, branch = 'main') {
   }
   
   // Step 4: Verify
-  console.log('4. Verifying site...');
+  console.error('4. Verifying site...');
   const siteUrl = `https://${ORG}.github.io/${repo}`;
   const httpStatus = sh(`curl -s -o /dev/null -w "%{http_code}" "${siteUrl}"`, { ignoreError: true, timeout: 10000 }).trim();
   results.steps.push({ step: 'verify', url: siteUrl, status: httpStatus });
@@ -61,7 +61,7 @@ async function deploy(repo, branch = 'main') {
 }
 
 const [,, repo, branch] = process.argv;
-if (!repo) { console.log('Usage: node deployment-agent.js <repo> [branch]'); process.exit(1); }
+if (!repo) { console.error('Usage: node deployment-agent.js <repo> [branch]'); process.exit(1); }
 deploy(repo, branch || 'main').then(r => {
   console.log('\n' + JSON.stringify(r, null, 2));
   process.exit(r.success ? 0 : 1);

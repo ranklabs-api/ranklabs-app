@@ -23,7 +23,7 @@ function loadEnv() {
 loadEnv();
 
 function sh(cmd, opts = {}) {
-  console.log(`  $ ${cmd}`);
+  console.error(`  $ ${cmd}`);
   try {
     return execSync(cmd, { encoding: 'utf8', stdio: 'pipe', ...opts });
   } catch (e) {
@@ -41,7 +41,7 @@ function ghApi(endpoint, method = 'GET', data = null) {
 
 // ─── Template variable substitution ──────────────────────────────────
 function applyTemplate(templateDir, outputDir, vars) {
-  console.log(`Applying template: ${templateDir} → ${outputDir}`);
+  console.error(`Applying template: ${templateDir} → ${outputDir}`);
   
   function walk(dir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -65,7 +65,7 @@ function applyTemplate(templateDir, outputDir, vars) {
   }
   
   walk(templateDir);
-  console.log(`  Template applied with ${Object.keys(vars).length} variables`);
+  console.error(`  Template applied with ${Object.keys(vars).length} variables`);
 }
 
 // ─── Main Provisioning Flow ──────────────────────────────────────────
@@ -83,11 +83,11 @@ async function provision(customer) {
   
   const repoName = business_name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
   
-  console.log(`\n🏗️  Provisioning site for: ${business_name}`);
-  console.log(`   Repo: ${ORG}/${repoName}`);
+  console.error(`\n🏗️  Provisioning site for: ${business_name}`);
+  console.error(`   Repo: ${ORG}/${repoName}`);
   
   // Step 1: Create repository
-  console.log('\n📁 Creating GitHub repository...');
+  console.error('\n📁 Creating GitHub repository...');
   const repo = ghApi(`/orgs/${ORG}/repos`, 'POST', {
     name: repoName,
     description: `${business_name} — ${industry}`,
@@ -101,10 +101,10 @@ async function provision(customer) {
     console.error('Failed to create repo:', repo?.message);
     return { success: false, error: repo?.message };
   }
-  console.log(`  ✅ Repo created: ${repo.html_url}`);
+  console.error(`  ✅ Repo created: ${repo.html_url}`);
   
   // Step 2: Apply template
-  console.log('\n🎨 Applying Astro SEO template...');
+  console.error('\n🎨 Applying Astro SEO template...');
   const workDir = `/tmp/searchrank-provision-${repoName}`;
   fs.mkdirSync(workDir, { recursive: true });
   
@@ -137,18 +137,18 @@ async function provision(customer) {
   
   // Commit and push
   sh(`cd ${workDir} && git add -A && git commit -m "Provision: ${business_name} site from SearchRank template" && git push origin main`);
-  console.log('  ✅ Template applied and pushed');
+  console.error('  ✅ Template applied and pushed');
   
   // Step 3: Enable GitHub Pages
-  console.log('\n🌐 Enabling GitHub Pages...');
+  console.error('\n🌐 Enabling GitHub Pages...');
   const pagesResult = ghApi(`/repos/${ORG}/${repoName}/pages`, 'POST', {
     source: { branch: 'main', path: '/' },
   });
   
   // Step 4: Configure deployment
-  console.log('\n⚙️  Configuring deployment...');
+  console.error('\n⚙️  Configuring deployment...');
   // The GitHub Actions workflow will auto-trigger on push
-  console.log('  ✅ GitHub Actions deploy workflow triggered');
+  console.error('  ✅ GitHub Actions deploy workflow triggered');
   
   // Step 5: Cleanup
   sh(`rm -rf ${workDir}`);
@@ -156,8 +156,8 @@ async function provision(customer) {
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   const siteUrl = `https://${ORG}.github.io/${repoName}`;
   
-  console.log(`\n✅ Provisioning complete in ${elapsed}s`);
-  console.log(`   Site: ${siteUrl}`);
+  console.error(`\n✅ Provisioning complete in ${elapsed}s`);
+  console.error(`   Site: ${siteUrl}`);
   
   return {
     success: true,
@@ -199,7 +199,7 @@ if (command === 'provision') {
   }
   console.log(JSON.stringify({ valid: true }));
 } else {
-  console.log(`Site Provisioning Engine
+  console.error(`Site Provisioning Engine
 Usage:
   node site-provisioning.js provision [customer.json]
   node site-provisioning.js validate [customer.json]

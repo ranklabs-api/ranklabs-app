@@ -23,7 +23,7 @@ if (!TOKEN) {
 }
 
 function sh(cmd, opts = {}) {
-  console.log(`  $ ${cmd}`);
+  console.error(`  $ ${cmd}`);
   return execSync(cmd, { encoding: 'utf8', stdio: 'pipe', ...opts });
 }
 
@@ -35,15 +35,15 @@ async function deploy(repo, branch = 'main') {
   const runId = crypto.randomBytes(4).toString('hex');
   const repoDir = path.join(WORK_DIR, `${repo}-${runId}`);
   
-  console.log(`\n🚀 Deploying ${ORG}/${repo} (run: ${runId})`);
+  console.error(`\n🚀 Deploying ${ORG}/${repo} (run: ${runId})`);
   
   // Phase 1: Clone
-  console.log('📦 Cloning repository...');
+  console.error('📦 Cloning repository...');
   fs.mkdirSync(WORK_DIR, { recursive: true });
   sh(`git clone --depth 1 --branch ${branch} ${gitUrl(repo)} ${repoDir}`);
   
   // Phase 2: Build
-  console.log('🔨 Building site...');
+  console.error('🔨 Building site...');
   const buildCmd = 'npm ci && npm run build';
   try {
     sh(buildCmd, { cwd: repoDir, timeout: 120000 });
@@ -59,15 +59,15 @@ async function deploy(repo, branch = 'main') {
     return { success: false, phase: 'verify', error: 'No dist/ directory' };
   }
   const files = fs.readdirSync(distDir);
-  console.log(`✅ Build complete — ${files.length} files in dist/`);
+  console.error(`✅ Build complete — ${files.length} files in dist/`);
   
   // Phase 4: Deploy (trigger GitHub Actions or push to gh-pages)
-  console.log('🚀 Deploying...');
+  console.error('🚀 Deploying...');
   
   // First try: trigger workflow_dispatch if deploy.yml exists
   const workflowFile = path.join(repoDir, '.github', 'workflows', 'deploy.yml');
   if (fs.existsSync(workflowFile)) {
-    console.log('Triggering GitHub Actions deploy workflow...');
+    console.error('Triggering GitHub Actions deploy workflow...');
     try {
       const curl = `curl -s -X POST \
         -H "Authorization: Bearer ${process.env.GH_TOKEN}" \
@@ -75,9 +75,9 @@ async function deploy(repo, branch = 'main') {
         "https://api.github.com/repos/${ORG}/${repo}/actions/workflows/deploy.yml/dispatches" \
         -d '{"ref":"${branch}"}'`;
       const result = JSON.parse(sh(curl));
-      console.log('Workflow dispatched');
+      console.error('Workflow dispatched');
     } catch (e) {
-      console.log('Workflow dispatch requires deploy.yml in .github/workflows/');
+      console.error('Workflow dispatch requires deploy.yml in .github/workflows/');
     }
   }
   
@@ -89,24 +89,24 @@ async function deploy(repo, branch = 'main') {
     fs.mkdirSync(pagesDir, { recursive: true });
     sh(`cp -r ${distDir}/* ${pagesDir}/`);
     sh(`cd ${pagesDir} && git init && git checkout -b gh-pages && git add -A && git commit -m "Deploy ${runId}" && git push -f ${gitUrl(repo)} gh-pages`);
-    console.log('✅ Pushed to gh-pages branch');
+    console.error('✅ Pushed to gh-pages branch');
   } catch (e) {
-    console.log('gh-pages push skipped (using Actions workflow instead)');
+    console.error('gh-pages push skipped (using Actions workflow instead)');
   }
   
   // Phase 5: Verify
-  console.log('🔍 Verifying deployment...');
+  console.error('🔍 Verifying deployment...');
   const pageUrl = `https://${ORG}.github.io/${repo}`;
   try {
     sh(`curl -s -o /dev/null -w "%{http_code}" "${pageUrl}"`, { timeout: 15000 });
-    console.log(`✅ Site accessible at ${pageUrl}`);
+    console.error(`✅ Site accessible at ${pageUrl}`);
   } catch (e) {
-    console.log('Site may take a moment to become available');
+    console.error('Site may take a moment to become available');
   }
   
   // Cleanup
   sh(`rm -rf ${repoDir}`);
-  console.log('🧹 Cleaned up workspace');
+  console.error('🧹 Cleaned up workspace');
   
   return { success: true, url: pageUrl, runId };
 }
@@ -120,5 +120,5 @@ if (command === 'deploy') {
     process.exit(result.success ? 0 : 1);
   });
 } else {
-  console.log(`Usage: node deploy-pipeline.js deploy <repo> [branch]`);
+  console.error(`Usage: node deploy-pipeline.js deploy <repo> [branch]`);
 }

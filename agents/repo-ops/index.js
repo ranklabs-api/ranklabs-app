@@ -22,7 +22,7 @@ function loadEnv() {
 loadEnv();
 
 function sh(cmd, opts = {}) {
-  console.log(`  $ ${cmd}`);
+  console.error(`  $ ${cmd}`);
   return execSync(cmd, { encoding: 'utf8', stdio: 'pipe', ...opts });
 }
 
@@ -40,13 +40,13 @@ class RepoOps {
   }
 
   clone(branch = 'main') {
-    console.log(`📦 Cloning ${ORG}/${this.repo}...`);
+    console.error(`📦 Cloning ${ORG}/${this.repo}...`);
     sh(`git clone --branch ${branch} ${gitUrl(this.repo)} ${this.workDir}`);
     return this;
   }
 
   branch(name) {
-    console.log(`🌿 Creating branch: ${name}`);
+    console.error(`🌿 Creating branch: ${name}`);
     sh(`cd ${this.workDir} && git checkout -b ${name}`);
     return this;
   }
@@ -77,26 +77,26 @@ class RepoOps {
   }
 
   commit(message) {
-    console.log(`💾 Committing: ${message}`);
+    console.error(`💾 Committing: ${message}`);
     sh(`cd ${this.workDir} && git add -A && git commit -m "${message}" || true`);
     return this;
   }
 
   push(branch) {
-    console.log(`🚀 Pushing to ${branch}...`);
+    console.error(`🚀 Pushing to ${branch}...`);
     sh(`cd ${this.workDir} && git push origin ${branch}`);
     return this;
   }
 
   createPR(title, body, base = 'main') {
     const branch = sh(`cd ${this.workDir} && git rev-parse --abbrev-ref HEAD`).trim();
-    console.log(`📝 Creating PR: ${branch} → ${base}`);
+    console.error(`📝 Creating PR: ${branch} → ${base}`);
     const AUTH = `-H "Authorization: Bearer ${process.env.GH_TOKEN}" -H "Accept: application/vnd.github+json"`;
     const data = JSON.stringify({ title, body, head: branch, base });
     const result = sh(`curl -s -X POST "https://api.github.com/repos/${ORG}/${this.repo}/pulls" ${AUTH} -d '${data}'`);
     try {
       const pr = JSON.parse(result);
-      console.log(`  PR created: ${pr.html_url}`);
+      console.error(`  PR created: ${pr.html_url}`);
       return pr;
     } catch (e) {
       console.error('PR creation failed:', result);
@@ -106,7 +106,7 @@ class RepoOps {
 
   cleanup() {
     sh(`rm -rf ${this.workDir}`);
-    console.log('🧹 Workspace cleaned');
+    console.error('🧹 Workspace cleaned');
     return this;
   }
 
@@ -132,7 +132,7 @@ if (command === 'seo-edit') {
   
   console.log(JSON.stringify({ success: true, changes: ops.getChanges() }));
 } else {
-  console.log(`Repo Operations Orchestration
+  console.error(`Repo Operations Orchestration
 Usage:
   node repo-ops.js seo-edit <repo> <file> <search> <replace> <message>
   
