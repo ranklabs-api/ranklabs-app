@@ -7,7 +7,7 @@ customers:
     site_url: "https://onetakewonderproductions.com"
     contact_name: "Pearl"
     contact_email: "pearl@onetakewonderproductions.com"
-    plan: "professional"
+    plan: "internal"
     active: true
     ga4_property_id: "properties/539489882"
     # provisioning_state: complete (omitted = complete, no status section in emails)
@@ -17,7 +17,7 @@ customers:
     site_url: "https://sincerelycozy.com"
     contact_name: "Josiah"
     contact_email: "josiahearl@gmail.com"
-    plan: "professional"
+    plan: "internal"
     active: true
     ga4_property_id: "properties/539496646"
     provisioning_state: "migrating"
