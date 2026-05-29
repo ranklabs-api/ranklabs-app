@@ -16,6 +16,7 @@ const BRAND = {
   muted:      '#6b7280',
   success:    '#10b981',
   warning:    '#f59e0b',
+  info:       '#3b82f6',
   danger:     '#ef4444',
   logo:       'https://getranklabs.com/logo.svg',
   site:       'https://getranklabs.com',
@@ -27,6 +28,61 @@ function gradeColor(grade) {
   const map = { A: BRAND.success, B: BRAND.warning, C: '#f97316', D: BRAND.danger, F: BRAND.danger };
   return map[grade] || BRAND.muted;
 }
+
+// ── Provisioning Status Section ───────────────────────────────────────────
+// Dynamically injected into SEO reports until migration/creation/DNS is complete.
+// Once provisioning_state is "complete" or absent, this section is omitted.
+
+const STATUS_CONFIG = {
+  'migrating': {
+    sectionLabel: 'Site Migration',
+    barClass: '',
+    label: 'Migration In Progress',
+    text: (c) => `We're migrating ${c.site_url} to the Rank Labs platform with SEO optimizations. Your existing site remains live during this process.`,
+    extra: null,
+  },
+  'migration-review': {
+    sectionLabel: 'Site Migration',
+    barClass: 'info',
+    label: 'Preview Ready — DNS Pending',
+    text: (c) => `Your migrated site is ready for review at the preview URL we sent. DNS cutover is pending your approval — reply to schedule it.`,
+    extra: null,
+  },
+  'site-creation': {
+    sectionLabel: 'Site Creation',
+    barClass: '',
+    label: 'Site Build In Progress',
+    text: (c) => `We're building your new SEO-optimized site. A preview link will be sent once it's ready for your review.`,
+    extra: null,
+  },
+  'dns-pending': {
+    sectionLabel: 'DNS Cutover',
+    barClass: '',
+    label: 'DNS Cutover Pending',
+    text: (c) => `Your site is deployed and ready, but DNS has not yet been pointed to our infrastructure. Update your CNAME record to complete the cutover — we can help with this.`,
+    extra: `<p style="font-size:12px;color:${BRAND.muted};margin:8px 0 0">Once DNS propagates, your live site will benefit from all SEO optimizations. Zero downtime during cutover.</p>`,
+  },
+};
+
+function generateStatusSection(customer) {
+  const state = customer?.provisioning_state;
+  if (!state || state === 'complete') return '';
+
+  const cfg = STATUS_CONFIG[state];
+  if (!cfg) return '';
+
+  return `
+    <div class="section">
+      <p class="section-title">${cfg.sectionLabel}</p>
+      <div class="status-bar ${cfg.barClass}">
+        <p class="status-label">${cfg.label}</p>
+        <p class="status-text">${cfg.text(customer)}</p>
+        ${cfg.extra || ''}
+      </div>
+    </div>`;
+}
+
+// ── Report HTML Generator ─────────────────────────────────────────────────
 
 function generateEmailHtml(report, customer) {
   const biz = customer?.business_name || report.site;
@@ -46,12 +102,31 @@ function generateEmailHtml(report, customer) {
 
   const gapList = (blog?.content_gaps || []).slice(0, 5).map(g => g.topic).join(', ') || 'none';
 
+  const statusSection = generateStatusSection(customer);
+
+  // ── GA4 Traffic section (if available) ──────────────────────────────────
+  const ga4 = report.ga4;
+  const trafficSection = ga4 ? `
+    <div class="section">
+      <p class="section-title">Organic Traffic</p>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-value">${ga4.active_users||0}</div><div class="stat-label">Users</div></div>
+        <div class="stat"><div class="stat-value">${ga4.sessions||0}</div><div class="stat-label">Sessions</div></div>
+        <div class="stat"><div class="stat-value">${ga4.page_views||0}</div><div class="stat-label">Page Views</div></div>
+        <div class="stat"><div class="stat-value">${ga4.bounce_rate||'--'}%</div><div class="stat-label">Bounce Rate</div></div>
+        <div class="stat"><div class="stat-value">${ga4.avg_session_sec||'--'}s</div><div class="stat-label">Avg Session</div></div>
+        <div class="stat"><div class="stat-value">${ga4.new_users||0}</div><div class="stat-label">New Users</div></div>
+      </div>
+      <p style="font-size:11px;color:${BRAND.muted};margin:8px 0 0">Source: Google Analytics 4 &bull; Last ${ga4.days || 7} days</p>
+    </div>` : '';
+
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
   body { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#f3f4f6 }
   .container { max-width:600px; margin:0 auto; background:#fff }
   .header { background:linear-gradient(135deg,${BRAND.primary},${BRAND.secondary}); padding:32px 24px; text-align:center }
+  .header img { display:block; margin:0 auto 12px; height:36px }
   .header h1 { color:#fff; font-size:22px; margin:0 0 4px; font-weight:700 }
   .header .sub { color:rgba(255,255,255,0.8); font-size:14px; margin:0 }
   .score-ring { display:inline-block; background:rgba(255,255,255,0.15); border-radius:50%; width:80px; height:80px; line-height:80px; font-size:36px; font-weight:800; color:#fff; margin:16px 0 8px }
@@ -70,11 +145,17 @@ function generateEmailHtml(report, customer) {
   .footer { background:${BRAND.bg}; padding:20px 24px; text-align:center; font-size:12px; color:${BRAND.muted}; border-top:1px solid #e5e7eb }
   .footer a { color:${BRAND.primary}; text-decoration:none }
   .btn { display:inline-block; background:linear-gradient(135deg,${BRAND.primary},${BRAND.secondary}); color:#fff; padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px; margin-top:12px }
+  .status-bar { background:${BRAND.bg}; border-left:4px solid ${BRAND.warning}; border-radius:4px; padding:14px 18px; margin:0 }
+  .status-bar.info { border-left-color:${BRAND.info} }
+  .status-bar.success { border-left-color:${BRAND.success} }
+  .status-bar .status-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:${BRAND.muted}; margin:0 0 4px }
+  .status-bar .status-text { font-size:14px; color:${BRAND.text}; margin:0 }
 </style></head><body>
 <div class="container">
 
   <!-- Header -->
   <div class="header">
+    ${BRAND.logo ? `<img src="${BRAND.logo}" alt="Rank Labs">` : ''}
     <h1>${biz}</h1>
     <p class="sub">Weekly SEO Report &bull; ${report.period}</p>
     <div class="score-ring">${summary.seo_score}</div><br>
@@ -82,6 +163,7 @@ function generateEmailHtml(report, customer) {
   </div>
 
   <div class="body">
+    ${statusSection}
     <!-- Stats -->
     <div class="section">
       <p class="section-title">At a Glance</p>
@@ -94,7 +176,7 @@ function generateEmailHtml(report, customer) {
         <div class="stat"><div class="stat-value">${summary.existing_blog_posts||0}</div><div class="stat-label">Blog Posts</div></div>
       </div>
     </div>
-
+    ${trafficSection}
     <!-- Findings -->
     <div class="section">
       <p class="section-title">Technical SEO Findings</p>
@@ -224,9 +306,18 @@ async function main() {
   // Build plain text version for multipart
   const { summary, technical_seo, performance, content, optimizations, blog, recommendations } = report;
   const bizName = customer?.business_name || report.site;
+
+  // Include status in plain text too
+  let statusPlain = '';
+  const state = customer?.provisioning_state;
+  if (state && state !== 'complete' && STATUS_CONFIG[state]) {
+    const sc = STATUS_CONFIG[state];
+    statusPlain = `\n${sc.sectionLabel}: ${sc.label}\n${sc.text(customer)}\n`;
+  }
+
   const plainText = `${bizName} - Weekly SEO Report
 ${report.period}
-Score: ${summary.seo_score}/100 (Grade ${summary.grade})
+Score: ${summary.seo_score}/100 (Grade ${summary.grade})${statusPlain}
 Load time: ${performance?.load_time_ms||'--'}ms | Words: ${content?.word_count||'--'}
 Errors: ${technical_seo.errors||0} | Warnings: ${technical_seo.warnings||0} | Fixes: ${summary.optimizations_applied||0}
 ${(technical_seo.top_findings||[]).map(f => `  [${f.severity.toUpperCase()}] ${f.detail}`).join('\n')}
@@ -240,13 +331,9 @@ Generated by Rank Labs - ${BRAND.site}`;
   const emailTemplate = `From: ${BRAND.fromName} <${BRAND.from}>
 To: ${emailTo}
 Subject: ${subject}
+Content-Type: text/html
 
-<#multipart type=alternative>
-<#part type=text/plain>
-${plainText}
-<#part type=text/html>
-${html}
-<#/multipart>`;
+${html}`;
 
   const emailFile = path.join(htmlDir, `${baseName}.email.txt`);
   fs.writeFileSync(emailFile, emailTemplate);
@@ -254,6 +341,9 @@ ${html}
   console.error(`[EMAIL] To: ${emailTo} (${customer?.business_name || 'direct'})`);
   console.error(`[EMAIL] Subject: ${subject}`);
   console.error(`[EMAIL] HTML: ${htmlFile}`);
+  if (state && state !== 'complete') {
+    console.error(`[STATUS] ${STATUS_CONFIG[state]?.sectionLabel}: ${STATUS_CONFIG[state]?.label}`);
+  }
 
   // Output the email template path for piping
   console.log(emailFile);

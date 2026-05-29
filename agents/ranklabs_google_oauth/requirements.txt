@@ -1,0 +1,15 @@
+# SearchOps Google OAuth — dependency notes
+#
+# The OAuth2 PKCE flow (auth.py, token_store.py, client.py) uses ONLY the
+# Python standard library — no pip installs required for auth itself.
+#
+# For calling Google APIs AFTER authentication, install as needed:
+
+# Google API client libraries:
+# google-api-python-client>=2.0.0    # Google Search Console, Gmail, etc.
+# google-auth>=2.0.0                 # Credentials object helpers
+# google-auth-oauthlib>=1.0.0        # Alternative: use google_auth_oauthlib.flow
+# google-auth-httplib2>=0.2.0
+
+# Individual API clients (optional, if you prefer over generic discovery):
+# google-api-python-client  # covers most APIs via discovery

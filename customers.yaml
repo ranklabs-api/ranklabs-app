@@ -9,6 +9,18 @@ customers:
     contact_email: "pearl@onetakewonderproductions.com"
     plan: "professional"
     active: true
+    ga4_property_id: "properties/539489882"
+    # provisioning_state: complete (omitted = complete, no status section in emails)
+
+  - id: "sincerelycozy"
+    business_name: "Sincerely Cozy"
+    site_url: "https://sincerelycozy.com"
+    contact_name: "Josiah"
+    contact_email: "josiahearl@gmail.com"
+    plan: "professional"
+    active: true
+    ga4_property_id: "properties/539496646"
+    provisioning_state: "migrating"
 
   - id: "getranklabs"
     business_name: "Rank Labs"
@@ -17,6 +29,14 @@ customers:
     contact_email: "josiahearl@gmail.com"
     plan: "internal"
     active: true
+    ga4_property_id: "properties/539456549"
+
+# provisioning_state values:
+#   migrating         — "Site Migration" — amber status bar in SEO emails
+#   migration-review  — "Site Migration" — blue info bar (preview ready, DNS pending)
+#   site-creation     — "Site Creation" — amber status bar (building new site)
+#   dns-pending       — "DNS Cutover" — amber status bar (DNS not yet pointed)
+#   complete / absent — no status section (site is fully live)
 
 # Branding used in all customer-facing emails
 branding:
